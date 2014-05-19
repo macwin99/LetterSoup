@@ -1,261 +1,511 @@
-function createSoup(){
-
+function createSoup()
+{
     soup = new Array(document.getElementById("Number_Rows").value);
-    for (i=0;i<document.getElementById("Number_Rows").value;i++){
+    for (i=0;i<document.getElementById("Number_Rows").value;i++)
+    {
         soup[i]= new Array(document.getElementById("Number_Colums").value);       
     }
-
 }
 
-function fillSoup(){
-    for (i=0;i<document.getElementById("Number_Rows").value;i++){
+function fillSoup()
+{
+    for (i=0;i<document.getElementById("Number_Rows").value;i++)
+    {
+        var row = table.insertRow(i);
         var letters = document.getElementById("letters" + i).value;
         var fragments = letters.split('');
-        for (x=0;x<document.getElementById("Number_Colums").value;x++){
+        for (x=0;x<document.getElementById("Number_Colums").value;x++)
+        {
+            var cell1 = row.insertCell(x);
+            cell1.innerHTML = fragments[x];
             soup[i][x]=fragments[x];
-        }       
+        }      
     }
 }
 
-function search_word(){
-    fillSoup();
-    var word_number = document.getElementsByName("word").length+1;
-    for (i=1;i<word_number;i++){
+function search_word()
+{
+    var word_number = document.getElementsByName("word").length;
+    if(word_number>0)
+    {
+        fillSoup();
+        for (i=1;i<=word_number;i++)
+        {
             var word = document.getElementById("word" + i).value;
             var fragments = word.split('');
-            search_pattern(fragments,fragments[0]);
+            search_pattern(fragments,fragments[0],word);
+        }
+    }
+    else
+    {
+        alert("You need to specifie wich Word are you looking for");
     }
 }
 
-function search_pattern(fragments,fragment){
+function search_pattern(fragments,fragment,word)
+{
     var exist = false;
-    var position;
-    for (y=0;i<document.getElementById("Number_Rows").value;i++){
-        for (x=0;i<document.getElementById("Number_Colums").value;i++){
-            if( soup[y][x]== fragment){
-                
-                var complet = search_next_pattern(fragments,x,y,'none',1);
-                if(complet){
+    for (var y=0;y<document.getElementById("Number_Rows").value;y++)
+    {
+        for (var x=0;x<document.getElementById("Number_Colums").value;x++)
+        {
+            if( soup[y][x]===fragment)
+            {
+                if(fragments.length>1)
+                {
+                    var complet = analise_first_pattern(fragments,x,y,1);
+                    if(complet)
+                    {
+                        exist=true;
+                        position = "The Word "+word+" is in "+y+" Row and "+x+" Column."
+                    }
+                }
+                else
+                {
                     exist=true;
-                    position = "The Word is in "+y+1+" Row and "+x+1+" Column."
+                    alert("The Word "+word+" is in "+y+" Row and "+x+" Column.");
                 }
             }
         }
     }
-    if(exist){
+    if(exist)
+    {
         alert(position);
     }
-    else{
-        alert("The Word is not here!");
+    else
+    {
+        alert("The Word is not in the Soup!");
     }
-    
 }
 
-function search_next_pattern(fragments,x,y,pattern,section){
-    switch(pattern) {
-        case 'col+':
-            if(section == fragments.length)
+function analise_first_pattern(fragments,x,y,section)
+{
+    var limite = fragments.length-1;
+    var find = false;
+    if(x==0&&y==0)//Primera Esquina
+    {
+        //No puede hacer -row, -col, -row.-col,+row.-col,-row.+col
+        for(var i=0; i<3;i++)
+        {
+            switch(i)
             {
-                return true;
+                case 0:
+                    find = search_next_pattern(fragments,x+1,y,'row+',section);
+                    break
+                case 1:
+                    find = search_next_pattern(fragments,x,y+1,'col+',section);
+                    break
+                case 2:
+                    find = search_next_pattern(fragments,x+1,y+1,'row+col+',section);
+                    break
+            } 
+            if(find)
+            {
+                i=3;
             }
-            else
+        }
+        return find;
+    }
+    else
+    {
+        if(x===0&&y===limite)//Segunda Esquina
+        {
+            //No puede hacer -row, +col, +row.+col,-row.+col,-row.-col
+            for(var i=0; i<3;i++)
             {
-                if(fragments[section] == soup[y][x])
+                switch(i)
                 {
-                    search_next_pattern(fragments,x+1,y,'col+');
+                    case 0:
+                        find = search_next_pattern(fragments,x-1,y,'row-',section);
+                        break
+                    case 1:
+                        find = search_next_pattern(fragments,x,y+1,'col+',section);
+                        break
+                    case 2:
+                        find = search_next_pattern(fragments,x-1,y+1,'row+col-',section);
+                        break
                 }
-                else
+                if(find)
                 {
-                    return false;
+                    i=3;
                 }
-                
+
             }
-            
-            break;
-        case 'col-':
-            if(section == fragments.length)
+            return find;
+        }
+        else
+        {
+            if(x===limite&&y===0)//Tercera Esquina
             {
-                return true;
-            }
-            else
-            {
-                if(fragments[section] == soup[y][x])
+                //No puede hacer +row, -col, +row.-col,+row.+col,-row.-col
+                for(var i=0; i<3;i++)
                 {
-                    search_next_pattern(fragments,x-1,y,'col-');
-                }
-                else
-                {
-                    return false;
-                }
-                
-            }
-            
-            break;
-        case 'row+':
-            if(section == fragments.length)
-            {
-                return true;
-            }
-            else
-            {
-                if(fragments[section] == soup[y][x])
-                {
-                    search_next_pattern(fragments,x,y+1,'row+');
-                }
-                else
-                {
-                    return false;
-                }
-                
-            }
-            
-            break;
-        case 'row-':
-            if(section == fragments.length)
-            {
-                return true;
-            }
-            else
-            {
-                if(fragments[section] == soup[y][x])
-                {
-                    search_next_pattern(fragments,x,y-1,'row-');
-                }
-                else
-                {
-                    return false;
-                }
-                
-            }
-            
-            break;
-        case 'row-col-':
-            if(section == fragments.length)
-            {
-                return true;
-            }
-            else
-            {
-                if(fragments[section] == soup[y][x])
-                {
-                    search_next_pattern(fragments,x-1,y-1,'row-col-');
-                }
-                else
-                {
-                    return false;
-                }
-                
-            }
-            
-            break;
-        case 'row-col+':
-            if(section == fragments.length)
-            {
-                return true;
-            }
-            else
-            {
-                if(fragments[section] == soup[y][x])
-                {
-                    search_next_pattern(fragments,x+1,y-1,'row-col+');
-                }
-                else
-                {
-                    return false;
-                }
-                
-            }
-            
-            break;
-        case 'row+col-':
-            if(section == fragments.length)
-            {
-                return true;
-            }
-            else
-            {
-                if(fragments[section] == soup[y][x])
-                {
-                    search_next_pattern(fragments,x-1,y+1,'row+col-');
-                }
-                else
-                {
-                    return false;
-                }
-                
-            }
-            
-            break;
-        case 'row+col+':
-            if(section == fragments.length)
-            {
-                return true;
-            }
-            else
-            {
-                if(fragments[section] == soup[y][x])
-                {
-                    search_next_pattern(fragments,x+1,y+1,'row+col+');
-                }
-                else
-                {
-                    return false;
-                }
-                
-            }
-            
-            break;
-        default:
-            if(fragments[1] == soup[x+1][y])
-            {
-                search_next_pattern(fragments,x+1,y,'col+');
-            }
-            else
-            {
-                if(fragments[1] == soup[x-1][y])
-                {
-                    search_next_pattern(fragments,x-1,y,'col-');
-                }
-                else
-                {
-                    if(fragments[1] == soup[x][y+1])
+                    switch(i)
                     {
-                        search_next_pattern(fragments,x,y+1,'row+');
+                        case 0:
+                            find = search_next_pattern(fragments,x-1,y,'row-',section);
+                            break
+                        case 1:
+                            find = search_next_pattern(fragments,x,y+1,'col+',section);
+                            break
+                        case 2:
+                            find = search_next_pattern(fragments,x-1,y+1,'row-col+',section);
+                            break
+                    }
+                    if(find)
+                    {
+                        i=3;
+                    }
+                }
+                return find;
+            }
+            else
+            {
+                if(x===limite&&y===limite)//Ultima Esquina
+                {
+                    //No puede hacer +row, +col, +row.-col,+row.+col,-row.+col
+                    for(var i=0; i<3;i++)
+                    {
+                        switch(i)
+                        {
+                            case 0:
+                                find = search_next_pattern(fragments,x-1,y,'row-',section);
+                                break
+                            case 1:
+                                find = search_next_pattern(fragments,x,y-1,'col-',section);
+                                break
+                            case 2:
+                                find = search_next_pattern(fragments,x-1,y-1,'row-col-',section);
+                                break
+                        } 
+                        if(find)
+                        {
+                            i=3;
+                        }
+                    }
+                    return find;
+                }
+                else
+                {
+                    if(x===0)//Todo menos esquinas
+                    {
+                        for(var i=0; i<5;i++)
+                        {
+                            switch(i)
+                            {
+                                case 0:
+                                    find = search_next_pattern(fragments,x+1,y,'row+',section);
+                                    break
+                                case 1:
+                                    find = search_next_pattern(fragments,x,y-1,'col-',section);
+                                    break
+                                case 2:
+                                    find = search_next_pattern(fragments,x,y+1,'col+',section);
+                                    break
+                                case 3:
+                                    find = search_next_pattern(fragments,x+1,y+1,'row+col+',section);
+                                    break
+                                case 4:
+                                    find = search_next_pattern(fragments,x+1,y-1,'row+col-',section);
+                                    break
+                            } 
+                            if(find)
+                            {
+                                i=5;
+                            }
+                        }
+                        return find;
                     }
                     else
                     {
-                        if(fragments[1] == soup[x][y-1])
+                        if(y===0)//Todo menos esquinas
                         {
-                            search_next_pattern(fragments,x,y-1,'row-');
+                            for(var i=0; i<5;i++)
+                            {
+                                switch(i)
+                                {
+                                    case 0:
+                                        find = search_next_pattern(fragments,x+1,y,'row+',section);
+                                        break
+                                    case 1:
+                                        find = search_next_pattern(fragments,x,y+1,'col+',section);
+                                        break
+                                    case 2:
+                                        find = search_next_pattern(fragments,x-1,y,'row-',section);
+                                        break
+                                    case 3:
+                                        find = search_next_pattern(fragments,x+1,y+1,'row+col+',section);
+                                        break
+                                    case 4:
+                                        find = search_next_pattern(fragments,x-1,y+1,'row-col+',section);
+                                        break
+                                }
+                                if(find)
+                                {
+                                    i=5;
+                                }
+                            }
+                            return find;
                         }
                         else
                         {
-                            if(fragments[1] == soup[x+1][y-1])
+                            if(x===limite)
                             {
-                                search_next_pattern(fragments,x+1,y-1,'row-col+');
+                                for(var i=0; i<5;i++)
+                                {
+                                    switch(i)
+                                    {
+                                        case 0:
+                                            find = search_next_pattern(fragments,x,y+1,'col+',section);
+                                            break
+                                        case 1:
+                                            find = search_next_pattern(fragments,x,y-1,'col-',section);
+                                            break
+                                        case 2:
+                                            find = search_next_pattern(fragments,x-1,y,'row-',section);
+                                            break
+                                        case 3:
+                                            find = search_next_pattern(fragments,x-1,y+1,'row-col+',section);
+                                            break
+                                        case 4:
+                                            find = search_next_pattern(fragments,x-1,y-1,'row-col-',section);
+                                            break
+                                    }
+                                    if(find)
+                                    {
+                                        i=5;
+                                    }
+                                }
+                                return find;
                             }
                             else
                             {
-                                if(fragments[1] == soup[x+1][y+1])
+                                if(y===limite)
                                 {
-                                    search_next_pattern(fragments,x+1,y+1,'row+col+');
+                                    for(var i=0; i<5;i++)
+                                    {
+                                        switch(i)
+                                        {
+                                            case 0:
+                                                find = search_next_pattern(fragments,x+1,y,'row+',section);
+                                                break
+                                            case 1:
+                                                find = search_next_pattern(fragments,x,y-1,'col-',section);
+                                                break
+                                            case 2:
+                                                find = search_next_pattern(fragments,x-1,y,'row-',section);
+                                                break
+                                            case 3:
+                                                find = search_next_pattern(fragments,x+1,y-1,'row+col-',section);
+                                                break
+                                            case 4:
+                                                find = search_next_pattern(fragments,x-1,y-1,'row-col-',section);
+                                                break
+                                        }
+                                        if(find)
+                                        {
+                                            i=4;
+                                        }
+                                    }
+                                    return find;
                                 }
                                 else
                                 {
-                                    if(fragments[1] == soup[x-1][y+1])
+                                    for(var i=0; i<8;i++)
                                     {
-                                        search_next_pattern(fragments,x-1,y+1,'row+col-');
+                                        switch(i)
+                                        {
+                                            case 0:
+                                                find = search_next_pattern(fragments,x+1,y,'row+',section);
+                                                break
+                                            case 1:
+                                                find = search_next_pattern(fragments,x,y-1,'col-',section);
+                                                break
+                                            case 2:
+                                                find = search_next_pattern(fragments,x-1,y,'row-',section);
+                                                break
+                                            case 3:
+                                                find = search_next_pattern(fragments,x+1,y-1,'row+col-',section);
+                                                break
+                                            case 4:
+                                                find = search_next_pattern(fragments,x-1,y-1,'row-col-',section);
+                                                break
+                                            case 5:
+                                                find = search_next_pattern(fragments,x+1,y+1,'row+col+',section);
+                                                break
+                                            case 6:
+                                                find = search_next_pattern(fragments,x,y+1,'col+',section);
+                                                break
+                                            case 7:
+                                                find = search_next_pattern(fragments,x-1,y+1,'row-col+',section);
+                                                break
+                                        }
+                                        if(find)
+                                        {
+                                            i=7;
+                                        }
+                                            
                                     }
-                                    else
-                                    {
-                                        search_next_pattern(fragments,x-1,y-1,'row-col-');
-                                    }
+                                    return find;
                                 }
                             }
                         }
                     }
                 }
             }
-            break;
+        }
+    }
+}
+
+function search_next_pattern(fragments,x,y,pattern,section)
+{
+    if((x>=fragments.length && section!=fragments.length)||(y>=fragments.length && section!=fragments.length)||(x<0 && section!=fragments.length)||(y<0 && section!=fragments.length)||section>fragments.length)
+    {
+        return false;
+    }
+    else
+    {
+        switch(pattern) 
+        {
+            case 'col+':
+                if(section == fragments.length)
+                {
+                    return true;
+                }
+                else
+                {
+                    if(fragments[section] == soup[y][x])
+                    {
+                        return search_next_pattern(fragments,x+1,y,'col+',section+1);
+                    }
+                    else
+                    {
+                        return false;
+                    }    
+                }
+                break;
+            case 'col-':
+                if(section == fragments.length)
+                {
+                    return true;
+                }
+                else
+                {
+                    if(fragments[section] == soup[y][x])
+                    {
+                        return search_next_pattern(fragments,x-1,y,'col-',section+1);
+                    }
+                    else
+                    {
+                        return false;
+                    }   
+                }
+                break;
+            case 'row+':
+                if(section == fragments.length)
+                {
+                    return true;
+                }
+                else
+                {
+                    if(fragments[section] == soup[y][x])
+                    {
+                        return search_next_pattern(fragments,x,y+1,'row+',section+1);
+                    }
+                    else
+                    {
+                        return false;
+                    }   
+                }
+                break;
+            case 'row-':
+                if(section == fragments.length)
+                {
+                    return true;
+                }
+                else
+                {
+                    if(fragments[section] == soup[y][x])
+                    {
+                        return search_next_pattern(fragments,x,y-1,'row-',section+1);
+                    }
+                    else
+                    {
+                        return false;
+                    }    
+                }
+                break;
+            case 'row-col-':
+                if(section == fragments.length)
+                {
+                    return true;
+                }
+                else
+                {
+                    if(fragments[section] == soup[y][x])
+                    {
+                        return search_next_pattern(fragments,x-1,y-1,'row-col-',section+1);
+                    }
+                    else
+                    {
+                        return false;
+                    }    
+                }
+                break;
+            case 'row-col+':
+                if(section == fragments.length)
+                {
+                    return true;
+                }
+                else
+                {
+                    if(fragments[section] == soup[y][x])
+                    {
+                        return search_next_pattern(fragments,x+1,y-1,'row-col+',section+1);
+                    }
+                    else
+                    {
+                        return false;
+                    }    
+                }
+                break;
+            case 'row+col-':
+                if(section == fragments.length)
+                {
+                    return true;
+                }
+                else
+                {
+                    if(fragments[section] == soup[y][x])
+                    {
+                        return search_next_pattern(fragments,x-1,y+1,'row+col-',section+1);
+                    }
+                    else
+                    {
+                        return false;
+                    }    
+                }
+                break;
+            case 'row+col+':
+                if(section == fragments.length)
+                {
+                    return true;
+                }
+                else
+                {
+                    if(fragments[section] == soup[y][x])
+                    {
+                        return search_next_pattern(fragments,x+1,y+1,'row+col+',section+1);
+                    }
+                    else
+                    {
+                        return false;
+                    }    
+                }
+                break;
+            default:
+                search_pattern_first(fragments,x,y,section);
+                break;
+        }
     }
 }

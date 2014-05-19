@@ -4,13 +4,9 @@ $( "#submit_letters" ).click(function() {
 });
 
 $( "#submit_words" ).click(function() {
-  addWords();
+    addWords();
 });
 
 $( "#search_words" ).click(function() {
-  search_word();
-});
-
-$( "#soup_words" ).click(function() {
-  alert(soup[0][1]);
+    search_word();
 });
