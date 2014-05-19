@@ -1,0 +1,79 @@
+body {
+   background: #BFD7C1; /* light green */
+   color: #262626;
+   font-family: Arial, san-serif;
+}
+ 
+#puzzle-form { 
+   background-color: #87C489;
+   width: 465px; 
+   padding: 20px; 
+   margin: 50px auto; 
+   border-radius: 15px;   
+   -moz-border-radius: 15px; 
+   -webkit-border-radius: 15px; 
+}
+ 
+#puzzle-form input, 
+#puzzle-form button,
+#puzzle-form select,   
+#puzzle-form textarea,   
+#puzzle-form label { 
+   font-size: 15px; 
+   margin-bottom: 2px;
+   font-family: Arial, san-serif;
+} 
+ 
+#puzzle-form input,
+#puzzle-form button,
+#puzzle-form select,   
+#puzzle-form textarea { 
+   width: 450px;
+   background: #fff;
+   border: 0;
+   -moz-border-radius: 5px; 
+   -webkit-border-radius: 5px; 
+   border-radius: 5px;
+   margin-bottom: 25px; 
+   padding: 5px; 
+} 
+ 
+#puzzle-form input:focus,   
+#puzzle-form select:focus,
+#puzzle-form button: focus,
+#puzzle-form textarea:focus { 
+   background-color: #E5E6E7;
+} 
+ 
+#puzzle-form textarea { 
+   height: 150px;   
+} 
+ 
+#puzzle-form #submit { 
+   width: 450px;   
+   color: #BFD7C1; 
+   border: none; 
+   background-color: #6EA070;
+} 
+ 
+#puzzle-form #submit:hover { 
+   background-color: #BFD7C1; 
+   color: #6EA070;
+}
+ 
+input:required, textarea:required { 
+   box-shadow: none;
+   -moz-box-shadow: none; 
+   -webkit-box-shadow: none; 
+   -o-box-shadow: none; 
+}
+ 
+#puzzle-form .required { 
+   font-weight:bold; 
+   color: #E5E6E7;     
+}
+ 
+#failure, #success {
+   color: #6EA070;
+   display:none; 
+}
